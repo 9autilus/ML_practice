@@ -1,0 +1,29 @@
+There are four files:
+
+1) breast-cancer-wisconsin.data
+  - 699 Feature-vectors
+  - Two classes [B, M]. (2 for Benign, 4 for Malignant. See the last column)
+  - 9 features
+  - First column is ID. (it is useless I think)
+  - Has missing features (shown by ?)
+  
+2) wdbc.data
+  - 569 Feature-vectors
+  - Two classes [B, M]. (Second column)
+  - 30 features
+  - First column is ID. (it is useless I think)
+  
+3) wpbc.data
+  - 198 Feature-vectors
+  - Two classes [N, R]. (Second column)
+  - 30 features
+  - First column is ID. (it is useless I think)
+  - Has missing features (shown by ?)
+  
+4) unformatted-data
+  - 698 Feature-vectors
+  - Two classes [B, M]. (2 for Benign, 4 for Malignant. Second column)
+  - 9 features
+  - First column is ID. (it is useless I think)
+  - Has missing features (shown by ?)
+  
