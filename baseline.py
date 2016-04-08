@@ -3,8 +3,8 @@ import numpy as np
 from sklearn import dummy, preprocessing
 from sklearn.cross_validation import train_test_split
 
-import parse_dataset_05 as parser
-from metrics_06 import MyMetric
+import parse_dataset as parser
+from metrics import MyMetric
 
 
 ## Setting to print array fully

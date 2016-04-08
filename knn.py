@@ -4,14 +4,14 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn import preprocessing
 from sklearn.cross_validation import train_test_split
 
-import parse_dataset_04 as parser
-from metrics_05 import MyMetric
+import parse_dataset as parser
+from metrics import MyMetric
 
 
 ## Setting to print array fully
 np.set_printoptions(threshold=sys.maxsize)
 
-datasets                = ['cancer', 'forest', 'optdigits'] ## Add more if need be
+datasets                = ['car', 'cancer', 'forest', 'optdigits'] ## Add more if need be
 test_ratios             = [0.9, 0.8, 0.7, 0.6, 0.5] ## Ratio of test set in full data set
 cross_validation_ratio  = 0.3 ## Ratio of validation set in full training data
 n_folds                 = 5
@@ -20,7 +20,7 @@ limit                   = 0 ## Number of feature vectors to read from file. 0: A
 split_seed              = None
 
 ## For testing purpose. Override.
-#datasets = ['forest'] ## Add more if need be
+datasets = ['car'] ## Add more if need be
 test_ratios = [0.5, 0.9] ## Ratio of test set in full data set
 #n_folds = 1
 k_list                  = [1, 2, 3, 4, 5, 6, 10, 20, 30]
@@ -39,7 +39,7 @@ def k_fold_cross_validation(X, y, k_value, classes):
   ## Loop over all k-folds
   for fold in xrange(n_folds):
     # Split into training and test
-    X_train, X_validation, y_train, y_validation = train_test_split(X, y, test_size=cross_validation_ratio, random_state = split_seed)
+    X_train, X_validation, y_train, y_validation = train_test_split(X, y, test_size=cross_validation_ratio, random_state = split_seed, stratify=y)
 
     num_tr_char = X_train.shape[0]
     num_cv_char = X_validation.shape[0]
@@ -149,7 +149,7 @@ set. Metrics are populated and displayed.
 '''
 def process_a_ratio(X, y, test_size_val, classes):
   ## Get a ratio
-  X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size_val, random_state = split_seed)
+  X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size_val, random_state = split_seed, stratify=y)
   
   best_k = get_best_parameters(X_train, y_train, classes)
 
@@ -192,30 +192,3 @@ if __name__ == "__main__":
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
-    
-    
-    
-    
