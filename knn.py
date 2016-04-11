@@ -11,8 +11,8 @@ from metrics import MyMetric
 ## Setting to print array fully
 np.set_printoptions(threshold=sys.maxsize)
 
-datasets                = ['car', 'cancer', 'forest', 'optdigits'] ## Add more if need be
-test_ratios             = [0.9, 0.8, 0.7, 0.6, 0.5] ## Ratio of test set in full data set
+datasets                = ['car', 'cancer', 'forest', 'nursery','optdigits'] ## Add more if need be
+test_ratios             = [0.5, 0.9] ## Ratio of test set in full data set
 cross_validation_ratio  = 0.3 ## Ratio of validation set in full training data
 n_folds                 = 5
 k_list                  = [1, 2, 3, 4, 5, 6, 10, 20, 30]
@@ -20,10 +20,10 @@ limit                   = 0 ## Number of feature vectors to read from file. 0: A
 split_seed              = None
 
 ## For testing purpose. Override.
-datasets = ['car'] ## Add more if need be
-test_ratios = [0.5, 0.9] ## Ratio of test set in full data set
+#datasets                = ['car', 'nursery', 'cancer', 'forest']
+#test_ratios = [0.5] ## Ratio of test set in full data set
 #n_folds = 1
-k_list                  = [1, 2, 3, 4, 5, 6, 10, 20, 30]
+#k_list                  = [1, 2, 3, 4, 5, 6, 10, 20, 30]
 #limit = 0
 #split_seed = 0
 
@@ -33,7 +33,7 @@ Divides the training set into [training, validation] based on the
 value of cross_validation_ratio parameter. 
 Returns mean of each metric obtained from k-fold cross validation
 '''
-def k_fold_cross_validation(X, y, k_value, classes):
+def k_fold_cross_validation(X, y, k_value, n_classes):
   k_fold_metric_list = []
 
   ## Loop over all k-folds
@@ -77,7 +77,7 @@ def k_fold_cross_validation(X, y, k_value, classes):
 
     ######### Store Metrics for current train/test division #######
     metric = MyMetric(0)
-    metric.compute_metrics(X_validation, y_validation, y_pred, y_score, classes)
+    metric.compute_metrics(X_validation, y_validation, y_pred, y_score, n_classes)
     k_fold_metric_list.append(metric)
     
   ## Get the mean value of all metrics
@@ -92,13 +92,13 @@ Based on the input [X_train, y_train] this function the
 best value of parameter k
 Returns the best k
 '''
-def get_best_parameters(X_train, y_train, classes):
+def get_best_parameters(X_train, y_train, n_classes):
   k_metric_list = []
   
   ## Loop over all values of k-neighbors to get error value for each
   for k_value in k_list:
     ## K-fold cross-validation
-    metric = k_fold_cross_validation(X_train, y_train, k_value, classes)
+    metric = k_fold_cross_validation(X_train, y_train, k_value, n_classes)
     k_metric_list.append(metric)
 
     ## Display for current k_value in knn
@@ -125,7 +125,7 @@ on input [X_train, y_train].
 And then tests it on input [X_test, y_test].
 Returns the metrics for this test.
 '''
-def final_train_and_test(X_train, X_test, y_train, y_test, best_k, classes):
+def final_train_and_test(X_train, X_test, y_train, y_test, best_k, n_classes):
 
   clf = KNeighborsClassifier(n_neighbors=best_k)
   clf.fit(X_train,y_train)
@@ -134,7 +134,7 @@ def final_train_and_test(X_train, X_test, y_train, y_test, best_k, classes):
   y_pred  = clf.predict(X_test)
   
   best_metric = MyMetric(0)
-  best_metric.compute_metrics(X_test, y_test, y_pred, y_score, classes)  
+  best_metric.compute_metrics(X_test, y_test, y_pred, y_score, n_classes)  
   
   return best_metric
   
@@ -147,14 +147,14 @@ parameters for the machine.
 One the best parameters are known, the machine is applied on the Test
 set. Metrics are populated and displayed.
 '''
-def process_a_ratio(X, y, test_size_val, classes):
+def process_a_ratio(X, y, test_size_val, n_classes):
   ## Get a ratio
   X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size_val, random_state = split_seed, stratify=y)
   
-  best_k = get_best_parameters(X_train, y_train, classes)
+  best_k = get_best_parameters(X_train, y_train, n_classes)
 
   ## Use this value of k in knn and compute final results
-  best_metric = final_train_and_test(X_train, X_test, y_train, y_test, best_k, classes)
+  best_metric = final_train_and_test(X_train, X_test, y_train, y_test, best_k, n_classes)
   
   ## Report the results
   print "Results for Test-Ratio %3.2f " % test_size_val
@@ -175,7 +175,7 @@ if __name__ == "__main__":
   for dataset in datasets:
     print "\n\n########## Dataset: ", dataset, "##########"
     ## Read full data from current dataset
-    X, y, classes = parser.parse_a_dataset(dataset, limit)
+    X, y, n_classes = parser.parse_a_dataset(dataset, limit)
     
     X = np.array(X)
     y = np.array(y)
@@ -188,7 +188,7 @@ if __name__ == "__main__":
     ## Loop over all the ratios. And see how they affect the results
     for test_size_val in test_ratios:
       print "\n\n------------------ Test size: %3.2f -----------------" % test_size_val
-      process_a_ratio(X, y, test_size_val, classes)
+      process_a_ratio(X, y, test_size_val, n_classes)
 
 
 
