@@ -1,13 +1,9 @@
 import math
 from sklearn import svm, metrics
 
-def compute_metrics(X_test, y_test, y_test_bin, y_pred, y_score, n_classes):
-  
-  if n_classes != y_test_bin.shape[1]:
-    print "Error in metric computation."
-    print "n_classes %d does not match dimension of y_test_bin: %d" \
-      % (n_classes, y_test_bin.shape[1])
-    return
+def compute_metrics(X_test, y_test, y_test_bin, y_pred, y_score):
+  ## Number of classes
+  n_classes = y_test_bin.shape[1]
   
   #---------------------------- Accuracy --------------------
   ## Mean accuracy (both give same results)
