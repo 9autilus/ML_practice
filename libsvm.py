@@ -4,7 +4,7 @@ from sklearn import svm, preprocessing
 from sklearn.cross_validation import train_test_split
 
 import parse_dataset_04 as parser
-from metrics_04 import MyMetric
+from metrics_05 import MyMetric
 
 
 ## Setting to print array fully
@@ -16,14 +16,15 @@ cross_validation_ratio  = 0.3 ## Ratio of validation set in full training data
 n_folds                 = 5
 C_list                  = [1e-4, 1e-3, 1e-2, 1e-1, 1e0, 1e1, 1e2, 1e3, 1e4]
 limit                   = 0 ## Number of feature vectors to read from file. 0: All of them
-
+split_seed              = None
 
 ## For testing purpose. Override.
-datasets = ['optdigits']#'cancer', 'forest'] ## Add more if need be
-test_ratios = [0.5, 0.9] ## Ratio of test set in full data set
+datasets = ['forest'] ## Add more if need be
+test_ratios = [0.5]#, 0.9] ## Ratio of test set in full data set
 #n_folds = 1
 #C_list = [1e0]
-#limit = 50
+#limit = 0
+#split_seed = 0
 
 '''
 Performs a k-fold cross validation on given training set for a given C.
@@ -37,7 +38,7 @@ def k_fold_cross_validation(X, y, C_value, classes):
   ## Loop over all k-folds
   for fold in xrange(n_folds):
     # Split into training and test
-    X_train, X_validation, y_train, y_validation = train_test_split(X, y, test_size=cross_validation_ratio)
+    X_train, X_validation, y_train, y_validation = train_test_split(X, y, test_size=cross_validation_ratio, random_state = split_seed)
 
     num_tr_char = X_train.shape[0]
     num_cv_char = X_validation.shape[0]
@@ -146,7 +147,7 @@ set. Metrics are populated and displayed.
 '''
 def process_a_ratio(X, y, test_size_val, classes):
   ## Get a ratio
-  X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size_val)
+  X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size_val, random_state = split_seed)
   
   best_C = get_best_parameters(X_train, y_train, classes)
 

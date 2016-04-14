@@ -83,7 +83,8 @@ def parse_forest_file(f, file_tag, limit=0):
     #print "feature_string (splitted): ", feature_list
     
     ## Pop the label data from feature_list
-    label = feature_list.pop(0)
+    ## The [0] index is added to get rid of the whitespace after class label char in file
+    label = feature_list.pop(0)[0]
     #print "label: ", label
     
     #if (label < 0) or (label > 9):
