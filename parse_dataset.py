@@ -1,118 +1,11 @@
 
 
-def parse_optdigits_file(f, file_tag, limit=0):
-  print "Parsing file: ", file_tag
-  
-  char_wd = 32
-  char_ht = 32
-  bmp_wd = char_wd + 1
-  bmp_ht = char_ht  
-  
-  X = []
-  y = []
-  feature_ctr = 0
-  cond = 1
-  
-  if limit:
-    cond = limit
-  
-  #Discard the first 21 dummy lines from the file
-  for i in xrange(21):
-    f.readline()
+filenames = dict()
+classes = dict()
+parsing_function = dict()
 
-  while(cond):
-  #for i in xrange(0,1):
-    ## Import the BMP data
-    feature_string = f.read(bmp_wd * bmp_ht)
-    if len(feature_string) != bmp_wd * bmp_ht:
-      if(len(feature_string) != 0):
-        print "Warning: Ending training. Short bmp %d found\n" %len(feature_string)
-      break;
-      
-    feature_list = []
-    for line in feature_string.split('\n'):
-      feature_list = feature_list + list(line)
-    # print "feature_list of len: ", len(feature_list), "\n", feature_list, "\n"
-    
-    ## Import the label data
-    label = int(f.readline(bmp_wd))
-    if (label < 0) or (label > 9):
-      print "Parsing error in tranining. label %d found\n" %label
-      break  
-     
-    X.append(feature_list)    
-    y.append(label)
-          
-    ## Increment the number of characters read
-    feature_ctr = feature_ctr + 1
-    print "\rParsing vector #: ", feature_ctr, 
-    
-    ## Decrement the iteration counter
-    if limit:
-      cond = cond - 1
-    
-  print "Done Parsing file: ", file_tag
-  return (X, y)  
 
-  
-def parse_forest_file(f, file_tag, limit=0):
-  print "Parsing file: ", file_tag
-
-  X = []
-  y = []
-  feature_ctr = 0
-  cond = 1
-  
-  if limit:
-    cond = limit  
-  
-  #Discard the first dummy line from the file
-  f.readline()
-
-  while(cond):
-    ## Import the first {label, feature}
-    feature_string = f.readline()
-    if len(feature_string) == 0:
-      #print "Warning: Ending training. Short bmp %d found\n" %len(bmp_string)
-      break;
-    # Discard the last newline character if present
-    if feature_string[-1] == '\n':
-      feature_string = feature_string[:-1]
-      
-    feature_list = feature_string.split(',')
-    #print "feature_string (splitted): ", feature_list
-    
-    ## Pop the label data from feature_list
-    ## The [0] index is added to get rid of the whitespace after class label char in file
-    label = feature_list.pop(0)[0]
-    #print "label: ", label
-    
-    #if (label < 0) or (label > 9):
-    #  print "Parsing error in tranining. label %d found\n" %label
-    #  break
-     
-    ## feature list is in string format right now. Convert it to float
-    feature_list = [float(i) for i in feature_list]
-    #print feature_list
-     
-    X.append(feature_list)    
-    y.append(label)
-
-    ## Increment the number of characters read
-    feature_ctr = feature_ctr + 1
-    print "\rParsing training vector #: ", feature_ctr,
-    
-    ## Decrement the iteration counter
-    if limit:
-      cond = cond - 1     
-    
-  print "Done Parsing file: ", file_tag
-  return (X, y)
-  
-
-def parse_cancer_file(f, file_tag, limit=0):
-  print "Parsing file: ", file_tag
-
+def parse_cancer_file(f, limit=0):
   X = []
   y = []
   feature_ctr = 0
@@ -175,5 +68,139 @@ def parse_cancer_file(f, file_tag, limit=0):
     if limit:
       cond = cond - 1     
   
-  print "Done Parsing file: ", file_tag
+  print "Done Parsing file."
   return (X, y)
+  
+
+def parse_forest_file(f, limit=0):
+  X = []
+  y = []
+  feature_ctr = 0
+  cond = 1
+  
+  if limit:
+    cond = limit  
+  
+  #Discard the first dummy line from the file
+  f.readline()
+
+  while(cond):
+    ## Import the first {label, feature}
+    feature_string = f.readline()
+    if len(feature_string) == 0:
+      #print "Warning: Ending training. Short bmp %d found\n" %len(bmp_string)
+      break;
+    # Discard the last newline character if present
+    if feature_string[-1] == '\n':
+      feature_string = feature_string[:-1]
+      
+    feature_list = feature_string.split(',')
+    #print "feature_string (splitted): ", feature_list
+    
+    ## Pop the label data from feature_list
+    ## The [0] index is added to get rid of the whitespace after class label char in file
+    label = feature_list.pop(0)[0]
+    #print "label: ", label
+    
+    #if (label < 0) or (label > 9):
+    #  print "Parsing error in tranining. label %d found\n" %label
+    #  break
+     
+    ## feature list is in string format right now. Convert it to float
+    feature_list = [float(i) for i in feature_list]
+    #print feature_list
+     
+    X.append(feature_list)    
+    y.append(label)
+
+    ## Increment the number of characters read
+    feature_ctr = feature_ctr + 1
+    print "\rParsing training vector #: ", feature_ctr,
+    
+    ## Decrement the iteration counter
+    if limit:
+      cond = cond - 1     
+    
+  print "Done Parsing file."
+  return (X, y)
+  
+  
+def parse_optdigits_file(f, limit=0):
+  char_wd = 32
+  char_ht = 32
+  bmp_wd = char_wd + 1
+  bmp_ht = char_ht  
+  
+  X = []
+  y = []
+  feature_ctr = 0
+  cond = 1
+  
+  if limit:
+    cond = limit
+  
+  #Discard the first 21 dummy lines from the file
+  for i in xrange(21):
+    f.readline()
+
+  while(cond):
+  #for i in xrange(0,1):
+    ## Import the BMP data
+    feature_string = f.read(bmp_wd * bmp_ht)
+    if len(feature_string) != bmp_wd * bmp_ht:
+      if(len(feature_string) != 0):
+        print "Warning: Ending training. Short bmp %d found\n" %len(feature_string)
+      break;
+      
+    feature_list = []
+    for line in feature_string.split('\n'):
+      feature_list = feature_list + list(line)
+    # print "feature_list of len: ", len(feature_list), "\n", feature_list, "\n"
+    
+    ## Import the label data
+    label = int(f.readline(bmp_wd))
+    if (label < 0) or (label > 9):
+      print "Parsing error in tranining. label %d found\n" %label
+      break  
+     
+    X.append(feature_list)    
+    y.append(label)
+          
+    ## Increment the number of characters read
+    feature_ctr = feature_ctr + 1
+    print "\rParsing vector #: ", feature_ctr, 
+    
+    ## Decrement the iteration counter
+    if limit:
+      cond = cond - 1
+    
+  print "Done Parsing file."
+  return (X, y)  
+
+  
+def init_parser():
+  filenames['cancer'] = r"E:\Course\CAP6610 Machine Learning\Project\dataset\BreastCancer\breast-cancer-wisconsin.data"
+  filenames['forest'] = r"E:\Course\CAP6610 Machine Learning\Project\dataset\ForestType\combined.csv"
+  filenames['optdigits'] = r"E:\Course\CAP6610 Machine Learning\Project\dataset\optdigits\optdigits-orig-combined.tra"
+
+  classes['cancer'] = [2, 4]
+  classes['forest'] = ['d', 'h', 'o', 's']
+  classes['optdigits'] = [0,1,2,3,4,5,6,7,8,9]
+
+  parsing_function['cancer'] = parse_cancer_file
+  parsing_function['forest'] = parse_forest_file
+  parsing_function['optdigits'] = parse_optdigits_file
+
+def parse_a_dataset(dataset_key, limit = 0):
+  f = open(filenames[dataset_key], "r")
+  
+  X, y = parsing_function[dataset_key](f, limit)
+  
+  return X, y, classes[dataset_key]
+  
+  
+
+  
+  
+  
+  
