@@ -53,6 +53,11 @@ class MyMetric:
     else:
       y_test_bin = label_binarize(y_test, classes=classes_list)
     
+    #print "y_test:\n", y_test    
+    #print "y_pred:\n", y_pred    
+    #print "y_test_bin:\n", y_test_bin
+    #print "y_score:\n", y_score    
+    
     #---------------------------- Accuracy --------------------
     ## Mean accuracy (both give same results)
     #mean_accuracy = clf.score(X_test, y_test)            ## from probability values
@@ -157,7 +162,7 @@ class MyMetric:
     
   ################################################
   ################################################
-  def mean_metric_from_kfold(self, metric_list):
+  def get_mean_metric(self, metric_list):
     num_kfolds = len(metric_list)
     
     ## Sum all k-folds
