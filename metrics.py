@@ -41,10 +41,11 @@ class MyMetric:
   
   ################################################
   ################################################
-  def compute_metrics(self, X_test, y_test, y_pred, y_score, classes_list):
-    ## Number of classes
-    n_classes = len(classes_list)
-
+  ## n_classes (in the parameters) is the number of classes present in test data
+  def compute_metrics(self, X_test, y_test, y_pred, y_score, n_classes):
+    ## class label IDs
+    classes_list = range(n_classes)
+    
     ## In case of 2 classes, Convert the labels to binary {0,1}
     if n_classes == 2:
       y_test = label_binarize(y_test, classes_list)
@@ -59,16 +60,27 @@ class MyMetric:
     #print "y_score:\n", y_score    
     
     #---------------------------- Accuracy --------------------
+    ## Accuracy for each class
+    '''
+    for class_ctr in xrange(n_classes):
+      print "Class %d Accuracy: %5.3f" % (class_ctr, metrics.accuracy_score(\
+        y_test_bin[:, class_ctr], \
+        label_binarize(y_pred, classes=classes_list)[:, class_ctr])) ## print each class
+    '''
+    #print "y_test",     y_test
+    #print "y_pred",     y_pred
+    #print "y_test_bin", y_test_bin
+    
     ## Mean accuracy (both give same results)
     #mean_accuracy = clf.score(X_test, y_test)            ## from probability values
     self.mean_accuracy = metrics.accuracy_score(y_test, y_pred) ##from predicted values
 
     #---------------------------- F1 Score --------------------
     ## F1-Score for each class
-    '''
+    #'''
     print "Classes F1-score: "
     print metrics.f1_score(y_test, y_pred, average=None) ## Score each class separately. Returns array of size [n_classes]
-    '''
+    #'''
     ## Mean F1-Score
     try:
       if n_classes == 2:
@@ -151,21 +163,28 @@ class MyMetric:
     self.mean_BEP_gap = sum_min_gap/float(n_classes)
 
     #---------------------------- RMSE --------------------
+    ## Verification for RMSE is still pending
+    ## I don't even know if (in multiclass case) this is the average of RMSE of all classes
     try:
       self.mean_rmse = math.sqrt(metrics.mean_squared_error(y_test_bin, y_score))
     except ValueError:
       print "Root MSE: Error"
-
-
+    
     #---------------------------- Cross-Entropy --------------------
-
+    try:
+      ## Verification for Cross-Entropy is still pending
+      ## I don't even know if (in multiclass case) this is the average of MXE of all classes
+      ## First augument can be y_test or y_test_bin. It doesn't matter.
+      self.mean_mxe = metrics.log_loss(y_test, y_score)
+    except:
+      print "Cross Entropy: Error"
     
   ################################################
   ################################################
   def get_mean_metric(self, metric_list):
-    num_kfolds = len(metric_list)
+    total_count = len(metric_list)
     
-    ## Sum all k-folds
+    ## Sum all
     for i in metric_list:
       self.mean_accuracy      += i.mean_accuracy     
       self.mean_f1_score      += i.mean_f1_score     
@@ -178,17 +197,17 @@ class MyMetric:
 
       self.mean_BEP_gap       += i.mean_BEP_gap
       
-    ## Divide by number of k-folds
-    self.mean_accuracy      = self.mean_accuracy      / num_kfolds   
-    self.mean_f1_score      = self.mean_f1_score      / num_kfolds
-    self.mean_lift          = self.mean_lift          / num_kfolds
-    self.mean_roc_area      = self.mean_roc_area      / num_kfolds
-    self.mean_avg_precision = self.mean_avg_precision / num_kfolds
-    self.mean_BEP           = self.mean_BEP           / num_kfolds
-    self.mean_rmse          = self.mean_rmse          / num_kfolds
-    self.mean_mxe           = self.mean_mxe           / num_kfolds
+    ## Divide by total_count
+    self.mean_accuracy      = self.mean_accuracy      / total_count   
+    self.mean_f1_score      = self.mean_f1_score      / total_count
+    self.mean_lift          = self.mean_lift          / total_count
+    self.mean_roc_area      = self.mean_roc_area      / total_count
+    self.mean_avg_precision = self.mean_avg_precision / total_count
+    self.mean_BEP           = self.mean_BEP           / total_count
+    self.mean_rmse          = self.mean_rmse          / total_count
+    self.mean_mxe           = self.mean_mxe           / total_count
     
-    self.mean_BEP_gap       = self.mean_BEP_gap       / num_kfolds
+    self.mean_BEP_gap       = self.mean_BEP_gap       / total_count
         
   
   ################################################
@@ -200,6 +219,7 @@ class MyMetric:
     print "Mean Avg-precision : %5.3f" % self.mean_avg_precision
     print "Mean BEP           : %5.3f (with mean-gap: %5.3f)" % (self.mean_BEP, self.mean_BEP_gap)
     print "Root MSE           : %5.3f" % self.mean_rmse
+    print "Cross-Entropy MXE  : %5.3f" % self.mean_rmse
   
   ################################################
   ################################################
