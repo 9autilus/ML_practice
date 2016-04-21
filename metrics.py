@@ -3,6 +3,9 @@ import numpy as np
 from sklearn import svm, metrics
 from sklearn.preprocessing import label_binarize
 
+## To calculate lift
+from collections import Counter 
+
 class MyMetric:
   mean_accuracy       = 0.0
   mean_f1_score       = 0.0
@@ -51,8 +54,10 @@ class MyMetric:
       y_test = label_binarize(y_test, classes_list)
       y_pred = label_binarize(y_pred, classes_list)
       y_test_bin = self.dual_column(y_test)
+      y_pred_bin = self.dual_column(y_pred)
     else:
       y_test_bin = label_binarize(y_test, classes=classes_list)
+      y_pred_bin = label_binarize(y_pred, classes=classes_list)
     
     #print "y_test:\n", y_test    
     #print "y_pred:\n", y_pred    
@@ -77,10 +82,10 @@ class MyMetric:
 
     #---------------------------- F1 Score --------------------
     ## F1-Score for each class
-    #'''
+    '''
     print "Classes F1-score: "
     print metrics.f1_score(y_test, y_pred, average=None) ## Score each class separately. Returns array of size [n_classes]
-    #'''
+    '''
     ## Mean F1-Score
     try:
       if n_classes == 2:
@@ -90,6 +95,92 @@ class MyMetric:
     except ValueError:
       print "Mean F1-score: Error"
 
+    #---------------------------- Lift --------------------
+    #print Counter(y) ## Print how many feature-vectors each class have  
+    num_patterns    = y_test.shape[0]
+    lift_threshold  = int(num_patterns/4) ## 25% of test vectors
+    lift_sum        = 0
+    
+    if lift_threshold > 0 and (num_patterns - lift_threshold) > 1:
+      #print "lift_threshold: ", lift_threshold, "num_patterns: ", num_patterns
+      
+      for class_ctr in xrange(n_classes):
+        sorted_score_index = np.argsort(y_score[:, class_ctr])[::-1]
+        
+        a = 0; b = 0; c = 0; d = 0;
+        
+        for i in xrange(lift_threshold):
+          if y_pred_bin[sorted_score_index[i]][class_ctr] == 1:
+            a = a + 1
+          else:
+            c = c + 1
+        
+        for i in xrange(lift_threshold, num_patterns):
+          if y_pred_bin[sorted_score_index[i]][class_ctr] == 1:
+            b = b + 1
+          else:
+            d = d + 1      
+      
+        try:
+          class_lift_numerator   = (a)/float(a + b)
+          class_lift_denominator = (a + c)/float(a + b + c + d)
+          
+          class_lift = class_lift_numerator/class_lift_denominator
+        except:
+          ## It's not an error. 
+          ## It's a limitation that if data set is too small, lift cannot be calculated.
+          ## Since the division is not defined. Signal nan in lift value.
+          class_lift = float('nan')
+          #print "lift warning: Class %d a,b,c,d: %d %d %d %d" % (class_ctr, a,b,c,d)
+        
+        #print "Class %d lift: %5.3f" % (class_ctr, class_lift)
+        lift_sum += class_lift
+        
+      self.mean_lift = lift_sum/float(n_classes)    
+    
+    '''
+    num_pattern_lift = int(y_test.shape[0]/4) ## 25% of test vectors
+    lift_sum = 0
+    
+    if num_pattern_lift > 1:
+      #print "num_pattern_lift: ", num_pattern_lift
+      
+      for class_ctr in xrange(n_classes):
+        sorted_score_index = np.argsort(y_score[:, class_ctr])[::-1][0: num_pattern_lift]
+        
+        a = 0; b = 0; c = 0; d = 0;
+        #print "sorted_score_index:", sorted_score_index
+        
+        for i in xrange(len(sorted_score_index)):
+          if y_pred_bin[sorted_score_index[i]][class_ctr] == 1:
+            if y_test_bin[sorted_score_index[i]][class_ctr] == 1:
+              a = a + 1
+            else:
+              c = c + 1
+          else:
+            if y_test_bin[sorted_score_index[i]][class_ctr] == 1:
+              b = b + 1
+            else:
+              d = d + 1            
+        
+        try:
+          class_lift_numerator   = (a)/float(a + b)
+          class_lift_denominator = (a + c)/float(a + b + c + d)
+          
+          class_lift = class_lift_numerator/class_lift_denominator
+        except:
+          ## It's not an error. 
+          ## It's a limitation that if data set is too small, lift cannot be calculated.
+          ## Since the division is not defined. Signal nan in lift value.
+          class_lift = float('nan')
+          #print "lift warning: Class %d a,b,c,d: %d %d %d %d" % (class_ctr, a,b,c,d)
+        
+        #print "Class %d lift: %5.3f" % (class_ctr, class_lift)
+        lift_sum += class_lift
+        
+      self.mean_lift = lift_sum/float(n_classes)
+      '''
+      
     #---------------------------- ROC Curve --------------------
     ##Compute ROC-curve for each class
     '''
